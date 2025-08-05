@@ -28,22 +28,22 @@ Contact: gdifede@stanford.edu
 
 ## Examples
 <figure style="text-align: center; margin-bottom: 100px;">
-  <img src="./pics/noising.drawio.jpg?raw=true" alt="Alt text" title="Title" width="500"/>
-  <figcaption>Noising and denoising process on a geomodel</figcaption>
+  <img src="./pics/vae_training.jpg?raw=true" alt="Alt text" title="Title" width="500"/>
+  <figcaption>VAE training procedure</figcaption>
 </figure>
 
 <figure style="text-align: center; margin-bottom: 100px;">
-  <img src="./pics/vae.drawio.jpg?raw=true" alt="Alt text" title="Title" width="500"/>
-  <figcaption>VAE component of the diffusion model</figcaption>
+  <img src="./pics/unet_training.jpg?raw=true" alt="Alt text" title="Title" width="500"/>
+  <figcaption>U-net training procedure</figcaption>
 </figure>
 
 <figure style="text-align: center; margin-bottom: 100px;">
-  <img src="./pics/ecmor_ldm.drawio.jpg?raw=true" alt="Alt text" title="Title" width="500"/>
-  <figcaption>Denoising U-net component of the diffusion model</figcaption>
+  <img src="./pics/ldm_generation.jpg?raw=true" alt="Alt text" title="Title" width="500"/>
+  <figcaption>3D-LDM generation of a new geomodel realization</figcaption>
 </figure>
 
 <figure style="text-align: center; margin-bottom: 100px;">
-  <img src="./pics/interpolation.jpg?raw=true" alt="Alt text" title="Title" width="500"/>
-  <figcaption>Interpolation test on a geomodel using LDM</figcaption>
+  <img src="./pics/denoising_3d.jpg?raw=true" alt="Alt text" title="Title" width="500"/>
+  <figcaption>Visualization of 3D denoising with variable number of steps</figcaption>
 </figure>
 
