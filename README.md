@@ -1,4 +1,4 @@
-# Latent Diffusion for Geomodel Parameterization
+# Multiscenario 3D Latent Diffusion for Geomodel Parameterization
 
 Code example for "3D latent diffusion models for parameterizing and history matching multiscenario facies systems"
 ## Summary
