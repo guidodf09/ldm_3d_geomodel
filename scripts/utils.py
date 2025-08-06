@@ -28,3 +28,12 @@ def compute_hd_loss(y_pred, well_hd_all):
     
     return hd_loss
 
+def model2tricat(model, thresh1, thresh2):
+    
+    model_copy = np.copy(model)
+    model_copy[model_copy < thresh1] = 0.
+    model_copy[(model_copy >= thresh1) & (model_copy <= thresh2)] = 0.5
+    model_copy[model_copy > thresh2] = 1.
+    
+    return model_copy
+
