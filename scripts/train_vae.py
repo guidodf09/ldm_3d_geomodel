@@ -1,13 +1,34 @@
 import os
-import numpy as np
-import torch
-import torch.nn.functional as F
-from torch.nn import MSELoss
-from torch.utils.data import DataLoader, Dataset
-from tqdm import tqdm
+import re
+import psutil
 import h5py
+import pickle
+import torch
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from tqdm import tqdm
+from torch.nn import MSELoss
+from torch.cuda.amp import GradScaler, autocast
+from torch.utils.data import DataLoader
+from mpl_toolkits.mplot3d import Axes3D
 
-from monai.losses import PerceptualLoss
+from monai import transforms
+from monai.apps import DecathlonDataset
+from monai.config import print_config
+from monai.data import Dataset
+from monai.utils import first, set_determinism
+
+from generative.inferers import LatentDiffusionInferer
+from generative.losses import PatchAdversarialLoss, PerceptualLoss
+from generative.networks.nets import AutoencoderKL, DiffusionModelUNet, PatchDiscriminator
+from generative.networks.schedulers import DDPMScheduler, DDIMScheduler
+
+import datasets
+import shutil
+import tempfile
+import torch.nn.functional as F
+
 
 from utils import (
     KL_loss,
@@ -16,8 +37,6 @@ from utils import (
     save_hard_data_pickle,
     load_hard_data_pickle
 )
-
-from autoencoder_model import AutoencoderKL  # Your 3D VAE model class
 
 # ---------------------------- Configs ---------------------------- #
 main_dir = './'
