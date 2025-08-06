@@ -1,3 +1,9 @@
+import os
+import numpy as np
+import h5y
+from torch.nn import MSELoss
+import torch
+
 def build_hard_data_pickle(models, well_loc):
     models_T = models.transpose((0, 4, 3, 2, 1))
     
@@ -24,9 +30,12 @@ def compute_hd_loss(y_pred, well_hd_all):
     iz = list(well_hd_all[:, 2].astype(int))
     
     v = torch.from_numpy(well_hd_all[:, -1]).float().to(device).repeat(y_pred.shape[0], 1)
-    hd_loss = mae_loss(y_pred[:, 0, ix, iy, iz], v)
-    
-    return hd_loss
+
+    preds = y_pred[:, 0, ix, iy, iz]
+
+    hd_mse_loss = MSELoss(preds, v)
+    return hd_mse_loss
+
 
 def model2tricat(model, thresh1, thresh2):
     
