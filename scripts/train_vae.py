@@ -1,3 +1,9 @@
+'''
+File: train_vae.py
+Author: Guido Di Federico (code is based on the implementation available at https://github.com/Project-MONAI/tutorials/tree/main/generative and https://github.com/huggingface/diffusers/)
+Description: Script to train a variational autoencoder (VAE) to learn the mapping between geomodel space and low-dimensional latent space for latent diffusion models
+'''
+
 # ---------------------------- Imports ---------------------------- #
 import os
 import h5py
