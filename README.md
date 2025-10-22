@@ -12,7 +12,7 @@ Our application involves large, conditional 3D three-facies (channel-levee-mud) 
 
 Code implementations are based on the following repositories:
 - [diffusers](https://github.com/huggingface/diffusers/)
-- [monai](https://github.com/Project-MONAI/tutorials/tree/main/generative)
+- [monai](https://github.com/Project-MONAI/tutorials/tree/main/generative) and [tutorial](https://github.com/Project-MONAI/GenerativeModels/blob/main/tutorials/generative/3d_ldm/3d_ldm_tutorial.ipynb)
 
 ## Software requirements
 Running the scripts requires the libraries `datasets`,  `diffusers`,  `monai` or  `monai-generative`.
