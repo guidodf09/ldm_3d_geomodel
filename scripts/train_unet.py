@@ -1,7 +1,8 @@
-"""
-File: train_unet_ddpm.py
-Description: Train a 3D UNet as the diffusion model conditioned on latent space from a pretrained VAE.
-"""
+'''
+File: train_unet.py
+Author: Guido Di Federico (code is based on the implementation available at https://github.com/Project-MONAI/tutorials/tree/main/generative and https://github.com/huggingface/diffusers/)
+Description: Script to train a U-net to learn the de-noising process in the latent space of latent diffusion models
+'''
 
 # ---------------------------- Imports ---------------------------- #
 import os
@@ -224,4 +225,4 @@ with torch.no_grad():
 test_loss /= len(test_loader)
 print(f"\n[Test] Final Loss: {test_loss:.6f}")
 
-print("\nTraining complete ✅")
+print("\nTraining complete")
