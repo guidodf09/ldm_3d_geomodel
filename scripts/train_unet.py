@@ -44,7 +44,7 @@ main_dir = './'
 case_dir = os.path.join(main_dir, 'scripts/')
 os.makedirs(case_dir, exist_ok=True)
 
-h5_file_path = '/oak/stanford/groups/lou/gdifede/3d_datasets/geomodels_128_paper.h5'
+h5_file_path = '../data/geomodels_128_paper.h5'
 
 # -------------------------- Load Data --------------------------- #
 with h5py.File(h5_file_path, 'r') as f:
@@ -78,7 +78,7 @@ val_loader = DataLoader(val_ds, batch_size=2)
 
 # ------------------------ Model Setup --------------------------- #
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
-vae_epoch = 200
+vae_epoch = 1000
 trained_vae_path = os.path.join(case_dir, f'trained_vae_{vae_epoch}_maybewrong.pt')
 vae_pickle_path = os.path.join(case_dir, 'autoencoder_properties.pkl')
 
