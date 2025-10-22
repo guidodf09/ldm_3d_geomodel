@@ -143,26 +143,32 @@ for epoch in range(n_epochs):
             "Percep": f"{train_percep / (step + 1):.4f}",
             "HD": f"{train_hd / (step + 1):.4f}"
         })
-
+    
     # ------------------------ Validation  ------------------------- #
     if (epoch + 1) % val_interval == 0:
         autoencoder.eval()
         val_recon, val_kl, val_percep, val_hd = 0.0, 0.0, 0.0, 0.0
-
+    
         with torch.no_grad():
             for step, batch in enumerate(val_loader):
                 images = batch["image"].to(device)
-
+    
                 recon, z_mu, z_sigma = autoencoder(images)
                 kl = KL_loss(z_mu, z_sigma)
                 recon_loss = l2_loss(recon, images)
                 perceptual = percep_loss_fn(recon, images)
                 hd = compute_hd_loss(recon, well_hd_combined)
-
+    
                 val_recon += recon_loss.item()
                 val_kl += kl.item()
                 val_percep += perceptual.item()
                 val_hd += hd.item()
-
+    
         n_val = len(val_loader)
-        print(f"[Validation @ Epoch {epoch+1}] Recon:
+        print(
+            f"[Validation @ Epoch {epoch+1}] "
+            f"Recon: {val_recon/n_val:.4f} | "
+            f"KL: {val_kl/n_val:.4f} | "
+            f"Percep: {val_percep/n_val:.4f} | "
+            f"HD: {val_hd/n_val:.4f}"
+        )
