@@ -43,7 +43,7 @@ main_dir = './'
 case_dir = os.path.join(main_dir, 'scripts/')
 os.makedirs(case_dir, exist_ok=True)
 
-h5_file_path = '/oak/stanford/groups/lou/gdifede/3d_datasets/geomodels_128_paper.h5'
+h5_file_path = '../data/geomodels_128_paper.h5'
 
 # -------------------------- Load Data --------------------------- #
 with h5py.File(h5_file_path, 'r') as f:
@@ -102,10 +102,10 @@ loss_perceptual = PerceptualLoss(
 ).to(device)
 
 # ---------------------- Loss Weights & Paths --------------------- #
-n_epochs = 1
+n_epochs = 1000
 perceptual_weight = 0.001
 kl_weight = 1e-6
-hd_weight = 0.01
+hd_weight = 1e-2
 
 trained_vae_path = os.path.join(case_dir, 'trained_vae')
 
