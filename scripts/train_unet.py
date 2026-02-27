@@ -141,7 +141,8 @@ for epoch in range(n_epochs):
         optimizer_diff.zero_grad(set_to_none=True)
 
         with autocast(enabled=True):
-            noise = torch.randn_like(images)
+            latent = torch.randn((train_loader.batch_size, 1, 16,16,4)).to(device)
+            noise = torch.randn_like(latent)
             timesteps = torch.randint(
                 0, scheduler.num_train_timesteps, (images.shape[0],), device=device
             ).long()
@@ -173,7 +174,9 @@ for epoch in range(n_epochs):
 
         with torch.no_grad():
             for step, batch in enumerate(val_loader):
-                images = batch["image"].to(device)
+
+                latent = torch.randn((train_loader.batch_size, 1, 16,16,4)).to(device)
+                noise = torch.randn_like(latent)
                 with autocast(enabled=True):
                     noise = torch.randn_like(images)
                     timesteps = torch.randint(
