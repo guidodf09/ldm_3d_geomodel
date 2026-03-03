@@ -65,7 +65,7 @@ well_loc = {
 # Save and load hard data
 hard_data_dict = build_hard_data_pickle(models_loaded, well_loc)
 save_hard_data_pickle(hard_data_dict, case_dir)
-well_hd_combined = np.concatenate(list(load_hard_data_pickle(case_dir).values()), axis=0)
+well_hd_combined = np.concatenate(list(hard_data_dict.values()), axis=0)
 
 # ------------------------ Dataset Setup ------------------------- #
 def create_dataloader(data, batch_size):
