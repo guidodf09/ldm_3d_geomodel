@@ -30,12 +30,12 @@ case_dir = os.path.join(main_dir, 'test_git/')
 os.makedirs(case_dir, exist_ok=True)
 
 h5_file_path = '../data/geomodels_128_paper.h5'
-h5_file_path = '/oak/stanford/groups/lou/gdifede/3d_datasets/geomodels_128_paper.h5'
+#h5_file_path = '/oak/stanford/groups/lou/gdifede/3d_datasets/geomodels_128_paper.h5'
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 # Training settings
 n_epochs = 1000
-batch_size = 1
+batch_size = 8
 val_interval = 10
 save_interval = 50
 autoencoder_warm_up_n_epochs = 1
@@ -130,7 +130,7 @@ for epoch in range(n_epochs):
     print(f"\nEpoch {epoch + 1}/{n_epochs}")
 
     if (epoch + 1) % save_interval == 0:
-        torch.save(autoencoder.state_dict(), f"{trained_vae_path}_{epoch + 1}_adv_hd.pt")
+        torch.save(autoencoder.state_dict(), f"{trained_vae_path}_{epoch + 1}.pt")
 
     autoencoder.train()
     discriminator.train()
