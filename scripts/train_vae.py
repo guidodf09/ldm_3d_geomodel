@@ -26,18 +26,19 @@ from utils import (
 
 # ---------------------------- Configs ---------------------------- #
 main_dir = './'
-case_dir = os.path.join(main_dir, 'scripts/')
+case_dir = os.path.join(main_dir, 'test_git/')
 os.makedirs(case_dir, exist_ok=True)
 
 h5_file_path = '../data/geomodels_128_paper.h5'
+h5_file_path = '/oak/stanford/groups/lou/gdifede/3d_datasets/geomodels_128_paper.h5'
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 # Training settings
 n_epochs = 1000
-batch_size = 4
+batch_size = 1
 val_interval = 10
 save_interval = 50
-autoencoder_warm_up_n_epochs = 5
+autoencoder_warm_up_n_epochs = 1
 
 # Loss weights
 kl_weight          = 1e-6
@@ -91,6 +92,7 @@ vae_properties = {
 
 autoencoder   = AutoencoderKL(**vae_properties).to(device)
 # autoencoder = nn.DataParallel(autoencoder)  #uncomment this line if training with multiple GPUs (recommended for larger batch sizes)
+
 discriminator = PatchDiscriminator(
     spatial_dims=3, num_layers_d=3, num_channels=32,
     in_channels=1, out_channels=1
@@ -99,7 +101,7 @@ discriminator = PatchDiscriminator(
 optimizer_g = torch.optim.Adam(autoencoder.parameters(),   lr=1e-4)
 optimizer_d = torch.optim.Adam(discriminator.parameters(), lr=1e-4)
 
-l1_loss        = L1Loss()
+l1_loss        = L1Loss() # or MSELoss()
 percep_loss_fn = PerceptualLoss(
     spatial_dims=3, is_fake_3d=True, fake_3d_ratio=0.2
 ).to(device)
@@ -118,7 +120,10 @@ def compute_hd_loss(y_pred, hd_points):
     iz = hd_points[:, 2].astype(int)
     v  = torch.from_numpy(hd_points[:, -1]).float().to(device).repeat(y_pred.shape[0], 1)
     preds = y_pred[:, 0, ix, iy, iz]
-    return F.mse_loss(preds, v)
+    loss = L1Loss() #or MSELoss()
+    return loss(preds, v) #or MSELoss()
+
+
 
 # --------------------------- Training Loop ---------------------- #
 for epoch in range(n_epochs):
