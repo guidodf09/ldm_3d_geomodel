@@ -13,7 +13,7 @@ import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from torch.nn import MSELoss, L1Loss
 from tqdm import tqdm
-
+import torch.nn as nn
 from monai.data import Dataset
 from generative.networks.nets import AutoencoderKL, PatchDiscriminator
 from generative.losses import PerceptualLoss, PatchAdversarialLoss
@@ -34,7 +34,7 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 # Training settings
 n_epochs = 1000
-batch_size = 2
+batch_size = 4
 val_interval = 10
 save_interval = 50
 autoencoder_warm_up_n_epochs = 5
@@ -90,6 +90,7 @@ vae_properties = {
 }
 
 autoencoder   = AutoencoderKL(**vae_properties).to(device)
+# autoencoder = nn.DataParallel(autoencoder)  #uncomment this line if training with multiple GPUs (recommended for larger batch sizes)
 discriminator = PatchDiscriminator(
     spatial_dims=3, num_layers_d=3, num_channels=32,
     in_channels=1, out_channels=1
