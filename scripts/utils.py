@@ -1,29 +1,52 @@
 import numpy as np
 import torch
 import pickle
+import torch.nn.functional as F
 
 
 def build_hard_data_pickle(models, well_loc):
-    models_T = models.transpose((0, 4, 3, 2, 1))
+    
+    '''
+    Build a pickle for the conditioning points (hard data) on the geomodels.
+
+    Parameters
+    ----------
+    models: ndarray
+        The multidimensional array of geomodels (shape is nr,nx,ny,nz)
+    
+    well_loc: dict
+        The dictionary of well names to locations (x,y), e.g. {'I1': (11, 11), 'I2': (11, 54)}
+    
+    Returns
+    ------
+    well_hd_all: ndarray:
+        The array of well locations and values (shape is nz*n_wells, 4, where 4 is [x,y,z,value])
+    '''
+    
+    models_T = models.transpose((0,4,3,2,1))
     
     for wn, (ix, iy) in well_loc.items():
-        ix -= 1
         iy -= 1
+        ix -= 1
         for iz in range(nz):
             data = models_T[:, iz, iy, ix, 0]
-            if data.max() != data.min():
-                print(f'Not all models have the same value at location {(ix, iy, iz)}', wn)
+            #print(wn, iz, data.max(), data.min())
+            if (data.max() != data.min()):
+                print(f'Not all models have the same value at location {ix, iy, iz}', wn)
 
     well_hd_all = {}
     for wn, (ix, iy) in well_loc.items():
+        well_hd_all[wn] = []
         ix -= 1
         iy -= 1
-        well_hd_all[wn] = [(ix, iy, iz, models_T[0, iz, iy, ix, 0]) for iz in range(nz)]
-        well_hd_all[wn] = np.array(well_hd_all[wn])
+        for iz in range(nz):
+            well_hd_all[wn].append((ix, iy, iz, models_T[0, iz, iy, ix, 0]))
+
+        for wn, hd in well_hd_all.items():
+            well_hd_all[wn] = np.array(hd)
     
     return well_hd_all
 
-import torch.nn.functional as F
 
 def compute_hd_loss(y_pred, well_hd_all):
     ix = list(well_hd_all[:, 0].astype(int))
