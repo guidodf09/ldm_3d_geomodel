@@ -1,4 +1,4 @@
-# 🔁 ESMDA Workflow Automation
+# ESMDA Workflow Automation
 
 > Ensemble Smoother with Multiple Data Assimilation — automated, dependency-chained HPC job submission.
 
