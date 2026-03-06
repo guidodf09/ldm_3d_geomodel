@@ -5,7 +5,7 @@
 ---
 
 ## Problem Description
-This workflow addresses probabilistic history matching for a 3D channelized oil-water reservoir. The reservoir is modeled on a 128×128×32 grid (10ft × 10ft × 5ft cells, ~4000ft depth) with three facies types (background, channel, high-permeability channel) controlling permeability and porosity distribution.
+This workflow addresses probabilistic history matching for a 3D channelized oil-water reservoir. The reservoir is modeled on a 128×128×32 grid with three facies types (background, channel, high-permeability channel) controlling permeability and porosity distribution.
 
 The field operates 6 producers and 3 injectors under BHP control. Producers target 4300 psi and water injectors 4700 psi. The simulation runs for 1500 days (30 × 50-day steps). Observed data consists of oil production rates (WOPR), water production rates (WWPR), and water injection rates (WWIR) at all wells.
 
