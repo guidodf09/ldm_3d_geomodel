@@ -1,0 +1,71 @@
+# ─── Paths ────────────────────────────────────────────────────────────────────
+paths:
+  case_dir: "./"
+  h5_file:  "/oak/stanford/groups/lou/gdifede/3d_datasets/geomodels_128_paper.h5"
+  unet_dir:  "trained_unet"
+  vae_dir:   "trained_vae"
+
+# ─── Grid ─────────────────────────────────────────────────────────────────────
+grid:
+  Nx:        128
+  Ny:        128
+  Nz:        32
+  Nx_latent: 16
+  Ny_latent: 16
+  Nz_latent: 4
+
+# ─── Facies ───────────────────────────────────────────────────────────────────
+facies:
+  thresh1: 0.25
+  thresh2: 0.80
+
+# ─── Wells ────────────────────────────────────────────────────────────────────
+wells:
+  i1: [16,  16]
+  i2: [16,  64]
+  i3: [16, 112]
+  i4: [64,  16]
+  p1: [64,  64]
+  p2: [64, 112]
+  p3: [112,  16]
+  p4: [112,  64]
+  p5: [112, 112]
+
+# ─── Data Split ───────────────────────────────────────────────────────────────
+data_split:
+  train_end:  8
+  val_start:  8
+  val_end:    16
+  test_end:   16
+
+# ─── VAE Checkpoint ───────────────────────────────────────────────────────────
+vae:
+  epoch:     10
+  multi_gpu: true
+
+# ─── UNet ─────────────────────────────────────────────────────────────────────
+unet:
+  spatial_dims:      3
+  in_channels:       1
+  out_channels:      1
+  num_channels:      [64, 128, 256]
+  num_res_blocks:    1
+  attention_levels:  [false, true, true]
+  num_head_channels: [0, 128, 256]
+
+# ─── Training ─────────────────────────────────────────────────────────────────
+training:
+  n_epochs:      20
+  batch_size:    4
+  val_interval:  5
+  save_interval: 5
+  seed:          0
+  lr:            0.0001
+
+# ─── Diffusion ────────────────────────────────────────────────────────────────
+diffusion:
+  n_train_timesteps: 1000
+  schedule:          "scaled_linear_beta"
+  beta_start:        0.0015
+  beta_end:          0.0195
+
