@@ -4,141 +4,146 @@ Author: Guido Di Federico (code is based on the implementation available at http
 Description: Script to train a variational autoencoder (VAE) to learn the mapping between geomodel space and low-dimensional latent space for latent diffusion models
 '''
 
-# ---------------------------- Imports ---------------------------- #
+# ─── Imports ──────────────────────────────────────────────────────────────────
 import os
 import h5py
-import torch
+import pickle
+
+import yaml
 import numpy as np
-import torch.nn.functional as F
-from torch.utils.data import DataLoader
-from torch.nn import MSELoss, L1Loss
-from tqdm import tqdm
+import torch
 import torch.nn as nn
-from monai.data import Dataset
+from tqdm import tqdm
+from torch.nn import L1Loss
+
 from generative.networks.nets import AutoencoderKL, PatchDiscriminator
 from generative.losses import PerceptualLoss, PatchAdversarialLoss
+
 from utils import (
     KL_loss,
     model2tricat,
     build_hard_data_pickle,
     save_hard_data_pickle,
+    create_dataloader,
+    compute_hd_loss,
+    print_losses
 )
 
-# ---------------------------- Configs ---------------------------- #
-main_dir = './'
-case_dir = os.path.join(main_dir, 'test_git/')
+# ─── Config ───────────────────────────────────────────────────────────────────
+with open('config_vae.yaml') as f:
+    cfg = yaml.safe_load(f)
+
+# ─── Directories ──────────────────────────────────────────────────────────────
+case_dir          = cfg['paths']['case_dir']
+h5_file_path      = cfg['paths']['h5_file']
+vae_dir          = os.path.join(case_dir, cfg['paths']['vae_dir'])
+os.makedirs(vae_dir, exist_ok=True)
+trained_vae_path = os.path.join(vae_dir, 'trained_vae')
+vae_pickle_path  = os.path.join(vae_dir, 'autoencoder_properties.pkl')
+vae_txt_path     = os.path.join(vae_dir, 'autoencoder_properties.txt')
 os.makedirs(case_dir, exist_ok=True)
 
-h5_file_path = '../data/geomodels_128_paper.h5'
-#h5_file_path = '/oak/stanford/groups/lou/gdifede/3d_datasets/geomodels_128_paper.h5'
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-# Training settings
-n_epochs = 1000
-batch_size = 8
-val_interval = 10
-save_interval = 50
-autoencoder_warm_up_n_epochs = 1
+# ─── Training Settings ────────────────────────────────────────────────────────
+n_epochs                     = cfg['training']['n_epochs']
+batch_size                   = cfg['training']['batch_size']
+val_interval                 = cfg['training']['val_interval']
+save_interval                = cfg['training']['save_interval']
+autoencoder_warm_up_n_epochs = cfg['training']['warm_up_epochs']
+multi_gpu_vae                = cfg['training']['multi_gpu']
+seed                         = cfg['training']['seed']
 
-# Loss weights
-kl_weight          = 1e-6
-perceptual_weight  = 0.001
-hd_weight          = 0.01
-adv_weight         = 0.01
+# ─── Loss Weights ─────────────────────────────────────────────────────────────
+kl_weight         = cfg['loss_weights']['kl']
+perceptual_weight = cfg['loss_weights']['perceptual']
+hd_weight         = cfg['loss_weights']['hd']
+adv_weight        = cfg['loss_weights']['adv']
 
-trained_vae_path = os.path.join(case_dir, 'trained_vae')
+# ─── Data Split ───────────────────────────────────────────────────────────────
+train_end = cfg['data_split']['train_end']
+val_start = cfg['data_split']['val_start']
+val_end   = cfg['data_split']['val_end']
 
-# -------------------------- Load Data --------------------------- #
+# ─── Load Data ────────────────────────────────────────────────────────────────
 with h5py.File(h5_file_path, 'r') as f:
-    models_loaded = model2tricat(np.array(f["data"])[:] / 255., 0.25, 0.8)
+    models_loaded = model2tricat(np.array(f["data"])[:] / 255.,
+                                 cfg['facies']['thresh1'],
+                                 cfg['facies']['thresh2'])
 
-seed = 0
 np.random.seed(seed)
 np.random.shuffle(models_loaded)
-size = models_loaded.shape[2:]
 
-# Well locations for hard data
-well_loc = {
-    'i1': (16, 16), 'i2': (16, 64), 'i3': (16, 112), 'i4': (64, 16),
-    'p1': (64, 64), 'p2': (64, 112), 'p3': (112, 16), 'p4': (112, 64), 'p5': (112, 112)
-}
+# ─── Hard Data ────────────────────────────────────────────────────────────────
+well_loc = {name: tuple(coords) for name, coords in cfg['wells'].items()}
 
 hard_data_dict   = build_hard_data_pickle(models_loaded, well_loc)
 save_hard_data_pickle(hard_data_dict, case_dir)
 well_hd_combined = np.concatenate(list(hard_data_dict.values()), axis=0)
 
-# ------------------------ Dataset Setup ------------------------- #
-def create_dataloader(data, batch_size, shuffle=False):
-    datalist = [{"image": torch.tensor(model)} for model in data]
-    dataset  = Dataset(data=datalist)
-    return DataLoader(dataset, batch_size=batch_size, shuffle=shuffle)
+# ─── Dataloaders ──────────────────────────────────────────────────────────────
+train_loader = create_dataloader(models_loaded[:train_end],        batch_size, shuffle=True)
+val_loader   = create_dataloader(models_loaded[val_start:val_end], batch_size)
+test_loader  = create_dataloader(models_loaded[val_end:],          batch_size)
 
-# Data split: 2400 train, 300 val, 300 test
-train_loader = create_dataloader(models_loaded[:2400],    batch_size, shuffle=True)
-val_loader   = create_dataloader(models_loaded[2400:2700], batch_size)
-test_loader  = create_dataloader(models_loaded[2700:],     batch_size)
-
-# ------------------------ Model Setup --------------------------- #
+# ─── VAE ──────────────────────────────────────────────────────────────────────
 vae_properties = {
-    'spatial_dims':      3,
-    'in_channels':       1,
-    'out_channels':      1,
-    'num_channels':      (64, 128, 256, 512),
-    'latent_channels':   1,
-    'num_res_blocks':    1,
-    'norm_num_groups':   16,
-    'attention_levels':  (False, False, False, True)
+    'spatial_dims':     cfg['vae']['spatial_dims'],
+    'in_channels':      cfg['vae']['in_channels'],
+    'out_channels':     cfg['vae']['out_channels'],
+    'num_channels':     tuple(cfg['vae']['num_channels']),
+    'latent_channels':  cfg['vae']['latent_channels'],
+    'num_res_blocks':   cfg['vae']['num_res_blocks'],
+    'norm_num_groups':  cfg['vae']['norm_num_groups'],
+    'attention_levels': tuple(cfg['vae']['attention_levels']),
 }
 
-autoencoder   = AutoencoderKL(**vae_properties).to(device)
-# autoencoder = nn.DataParallel(autoencoder)  #uncomment this line if training with multiple GPUs (recommended for larger batch sizes)
+with open(vae_pickle_path, 'wb') as f:
+    pickle.dump(vae_properties, f)
 
+with open(vae_txt_path, 'w') as f:
+    f.write("\n".join(f"{k}: {v}" for k, v in vae_properties.items()))
+
+autoencoder = AutoencoderKL(**vae_properties).to(device)
+if multi_gpu_vae:
+    autoencoder = nn.DataParallel(autoencoder)
+
+# ─── Discriminator ────────────────────────────────────────────────────────────
 discriminator = PatchDiscriminator(
-    spatial_dims=3, num_layers_d=3, num_channels=32,
-    in_channels=1, out_channels=1
+    spatial_dims=cfg['discriminator']['spatial_dims'],
+    num_layers_d=cfg['discriminator']['num_layers_d'],
+    num_channels=cfg['discriminator']['num_channels'],
+    in_channels=cfg['discriminator']['in_channels'],
+    out_channels=cfg['discriminator']['out_channels'],
 ).to(device)
 
-optimizer_g = torch.optim.Adam(autoencoder.parameters(),   lr=1e-4)
-optimizer_d = torch.optim.Adam(discriminator.parameters(), lr=1e-4)
+# ─── Optimizers & Losses ──────────────────────────────────────────────────────
+optimizer_g = torch.optim.Adam(autoencoder.parameters(),   lr=cfg['training']['lr'])
+optimizer_d = torch.optim.Adam(discriminator.parameters(), lr=cfg['training']['lr'])
 
-l1_loss        = L1Loss() # or MSELoss()
+l1_loss        = L1Loss()
 percep_loss_fn = PerceptualLoss(
-    spatial_dims=3, is_fake_3d=True, fake_3d_ratio=0.2
+    spatial_dims=3, is_fake_3d=True, fake_3d_ratio=0.2,
+    network_type=cfg['training']['perceptual_network']
 ).to(device)
 adv_loss = PatchAdversarialLoss(criterion='least_squares')
 
-# Loss tracking
+# ─── Loss Tracking ────────────────────────────────────────────────────────────
 epoch_recon_loss_list = []
 epoch_gen_loss_list   = []
 epoch_disc_loss_list  = []
 epoch_hd_loss_list    = []
 
-# ------------------------ HD Loss Function ---------------------- #
-def compute_hd_loss(y_pred, hd_points):
-    ix = hd_points[:, 0].astype(int)
-    iy = hd_points[:, 1].astype(int)
-    iz = hd_points[:, 2].astype(int)
-    v  = torch.from_numpy(hd_points[:, -1]).float().to(device).repeat(y_pred.shape[0], 1)
-    preds = y_pred[:, 0, ix, iy, iz]
-    loss = L1Loss() #or MSELoss()
-    return loss(preds, v) #or MSELoss()
-
-
-
-# --------------------------- Training Loop ---------------------- #
+# ─── Training Loop ────────────────────────────────────────────────────────────
 for epoch in range(n_epochs):
-    print(f"\nEpoch {epoch + 1}/{n_epochs}")
-
-    if (epoch + 1) % save_interval == 0:
-        torch.save(autoencoder.state_dict(), f"{trained_vae_path}_{epoch + 1}.pt")
 
     autoencoder.train()
     discriminator.train()
 
-    epoch_recon, epoch_hd, epoch_gen, epoch_disc = 0.0, 0.0, 0.0, 0.0
+    epoch_recon, epoch_kl, epoch_percep, epoch_hd, epoch_gen, epoch_disc = 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
 
     train_loop = tqdm(enumerate(train_loader), total=len(train_loader), ncols=110)
-    train_loop.set_description(f"Epoch {epoch + 1}")
+    train_loop.set_description(f"Epoch {epoch + 1}/{n_epochs}")
 
     for step, batch in train_loop:
         images = batch["image"].to(device)
@@ -178,26 +183,43 @@ for epoch in range(n_epochs):
             loss_d.backward()
             optimizer_d.step()
 
-        # -------- Logging --------
-        epoch_recon += recon_loss.item()
-        epoch_hd    += hd.item()
+        # -------- Accumulate --------
+        epoch_recon  += recon_loss.item()
+        epoch_kl     += kl.item()
+        epoch_percep += perceptual.item()
+        epoch_hd     += hd.item()
         if epoch > autoencoder_warm_up_n_epochs:
             epoch_gen  += generator_loss.item()
             epoch_disc += discriminator_loss.item()
 
         train_loop.set_postfix({
-            "recon":  f"{epoch_recon / (step + 1):.4f}",
-            "hd":     f"{epoch_hd    / (step + 1):.4f}",
-            "gen":    f"{epoch_gen   / (step + 1):.4f}",
-            "disc":   f"{epoch_disc  / (step + 1):.4f}",
+            "recon":  f"{epoch_recon  / (step + 1):.4f}",
+            "kl":     f"{epoch_kl     / (step + 1):.4f}",
+            "percep": f"{epoch_percep / (step + 1):.4f}",
+            "hd":     f"{epoch_hd     / (step + 1):.4f}",
+            "gen":    f"{epoch_gen    / (step + 1):.4f}",
+            "disc":   f"{epoch_disc   / (step + 1):.4f}",
         })
 
-    epoch_recon_loss_list.append(epoch_recon / (step + 1))
-    epoch_hd_loss_list.append(epoch_hd       / (step + 1))
-    epoch_gen_loss_list.append(epoch_gen      / (step + 1) if epoch > autoencoder_warm_up_n_epochs else 0.0)
-    epoch_disc_loss_list.append(epoch_disc    / (step + 1) if epoch > autoencoder_warm_up_n_epochs else 0.0)
+    n_train    = step + 1
+    adv_active = epoch > autoencoder_warm_up_n_epochs
 
-    # ------------------------ Validation ------------------------- #
+    epoch_recon_loss_list.append(epoch_recon  / n_train)
+    epoch_hd_loss_list.append(epoch_hd        / n_train)
+    epoch_gen_loss_list.append(epoch_gen       / n_train if adv_active else 0.0)
+    epoch_disc_loss_list.append(epoch_disc     / n_train if adv_active else 0.0)
+
+    print_losses(
+        split="Train", epoch=epoch + 1, n_epochs=n_epochs,
+        recon=epoch_recon   / n_train,
+        kl=epoch_kl         / n_train,
+        percep=epoch_percep / n_train,
+        hd=epoch_hd         / n_train,
+        gen=epoch_gen       / n_train if adv_active else None,
+        disc=epoch_disc     / n_train if adv_active else None,
+    )
+
+    # ─── Validation ───────────────────────────────────────────────────────────
     if (epoch + 1) % val_interval == 0:
         autoencoder.eval()
         val_recon, val_kl, val_percep, val_hd = 0.0, 0.0, 0.0, 0.0
@@ -218,10 +240,19 @@ for epoch in range(n_epochs):
                 val_hd     += hd.item()
 
         n_val = len(val_loader)
-        print(
-            f"[Validation @ Epoch {epoch + 1}] "
-            f"Recon: {val_recon/n_val:.4f} | "
-            f"KL: {val_kl/n_val:.4f} | "
-            f"Percep: {val_percep/n_val:.4f} | "
-            f"HD: {val_hd/n_val:.4f}"
+        print_losses(
+            split="Val", epoch=epoch + 1, n_epochs=n_epochs,
+            recon=val_recon   / n_val,
+            kl=val_kl         / n_val,
+            percep=val_percep / n_val,
+            hd=val_hd         / n_val,
         )
+
+    # ─── Checkpoint ───────────────────────────────────────────────────────────
+    if (epoch + 1) % save_interval == 0:
+        torch.save(autoencoder.state_dict(), f"{trained_vae_path}{epoch + 1}.pt")
+        print(f"Model saved to {trained_vae_path}{epoch + 1}.pt")
+
+# ─── Save Final Model ─────────────────────────────────────────────────────────
+torch.save(autoencoder.state_dict(), f"{trained_vae_path}.pt")
+print(f"Final model saved to {trained_vae_path}.pt")
