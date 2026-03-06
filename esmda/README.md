@@ -68,12 +68,12 @@ All hardcoded parameters are centralized in `config.yaml`:
 | Section | Parameters |
 |---|---|
 | `paths` | Run directories, diffuser model location |
-| `grid` | Spatial dimensions (Nx, Ny, Nz) and latent dimensions (Nx_latent, Ny_latent, Nz_latent) |
+| `grid` | Spatial dimensions and latent dimensions |
 | `diffusion` | Scheduler settings and scale factor |
 | `facies` | Thresholds, permeability and porosity maps |
 | `simulation` | Well counts, time steps, results file path |
 | `esmda` | Error variance, alpha schedule, observation times |
-| `ensemble` | Ensemble size (`nr`) and ES-MDA iteration count (`Na`) |
+| `ensemble` | Ensemble size and ES-MDA iteration count|
 
 ---
 
