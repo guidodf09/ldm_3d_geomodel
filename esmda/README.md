@@ -16,7 +16,7 @@ Reservoir simulations are run with tNavigator using `test.DATA` as the input fil
 ---
 
 ## Overview
-The ES-MDA update is performed in the latent space of a pretrained LDM. At each iteration, the ensemble of geomodels is encoded into latent vectors, updated via ES-MDA using the mismatch between simulated and observed production data, and decoded back to geomodel space via the LDM decoder. All parameters are centralized in `config.yaml`.
+The ES-MDA update is performed in the latent space of a pretrained LDM. At each iteration, the ensemble of latent vectors is updated via ES-MDA using the mismatch between simulated and observed production data, obtained from simulating the corresponding LDM-generated models. All parameters are centralized in `config.yaml`.
 
 Jobs are submitted with dependency chaining so each stage automatically triggers the next upon successful completion. The main entry point is `submit_all_loop.sh`, which contains the entire pipeline from prior generation through iterative data assimilation.
 
