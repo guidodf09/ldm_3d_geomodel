@@ -74,6 +74,8 @@ All hardcoded parameters are centralized in `config.yaml`:
 
 ---
 
+> **Note:** Resource settings such as memory, walltime, number of CPUs, and GPU allocation are hardcoded in the individual `.slurm` files and should be reviewed and adjusted to match the target cluster and problem size before submission. In particular, `--cpus-per-task` in `esmda_ensemble.slurm` and `esmda_true.slurm` controls the number of threads passed to tNavigator via `OMP_NUM_THREADS`.
+
 ## Usage
 
 ### Full workflow (including true model simulation)
