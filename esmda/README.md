@@ -31,8 +31,10 @@ To run a new case, duplicate the `case_test` template folder inside the main dir
 | `unet_properties.pkl` | UNet architecture configuration |
 | `trained_vae.pt` | Pretrained VAE weights |
 | `trained_unet.pt` | Pretrained UNet weights |
-| `true.npy` | Synthetic true model, shape `(1, Nx, Ny, Nz)`, used to create the true model tNavigator run folder |
+| `true.npy` | Synthetic true model, shape `(1, Nx, Ny, Nz)`, used to create the true model tNavigator run folder* |
 | `template_folder/` | tNavigator run template (contains `test.DATA`, `KR.INC`, etc.) |
+
+> *The true model can be any sample from the geomodel dataset. Examples used in the paper are available in the `data` folder.
 
 ---
 
