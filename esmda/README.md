@@ -11,7 +11,7 @@ The field operates 6 producers and 3 injectors under BHP control. Producers targ
 
 The goal is to update an ensemble of geomodels such that their simulated production responses match the observed data from a reference (true) model, using ES-MDA as the assimilation algorithm and an LDM to ensure updated models remain geologically consistent.
 
-Reservoir simulations are run with tNavigator using `test.DATA` as the input deck, which reads facies-derived `PERMX.INC` and `PORO.INC` files written by the preprocessing step.
+Reservoir simulations are run with tNavigator using `test.DATA` as the input file, which reads facies-derived `PERMX.INC` and `PORO.INC` files written by the preprocessing step.
 
 ---
 
