@@ -59,14 +59,14 @@ discriminator:
 # ─── Training ─────────────────────────────────────────────────────────────────
 training:
   n_epochs:           1000
-  batch_size:         8
+  batch_size:         8 # reduce if memory does not allow (or use multiple gpus)
   val_interval:       5
   save_interval:      5
   warm_up_epochs:     5
   seed:               0
   lr:                 0.0001
-  perceptual_network: "squeeze"
-  multi_gpu:        true
+  perceptual_network: "squeeze" # or resnet50
+  multi_gpu:        true # false for single gpu
 
 # ─── Loss Weights ─────────────────────────────────────────────────────────────
 loss_weights:
