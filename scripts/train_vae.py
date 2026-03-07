@@ -256,3 +256,20 @@ for epoch in range(n_epochs):
 # ─── Save Final Model ─────────────────────────────────────────────────────────
 torch.save(autoencoder.state_dict(), f"{trained_vae_path}.pt")
 print(f"Final model saved to {trained_vae_path}.pt")
+
+# ─── Compute and Save Scale Factor ───────────────────────────────────────────
+with torch.no_grad():
+    sample       = next(iter(train_loader))
+    z            = autoencoder.module.encode_stage_2_inputs(sample["image"].to(device))
+    scale_factor = (1 / torch.std(z)).item()
+print(f"Scaling factor set to {scale_factor:.4f}")
+
+with open('config_unet.yaml') as f:
+    cfg_unet = yaml.safe_load(f)
+
+cfg_unet['vae']['scale_factor'] = scale_factor
+
+with open('config_unet.yaml', 'w') as f:
+    yaml.dump(cfg_unet, f, default_flow_style=False)
+
+print(f"Scale factor written to config_unet.yaml")
