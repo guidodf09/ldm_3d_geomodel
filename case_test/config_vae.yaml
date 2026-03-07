@@ -32,9 +32,10 @@ wells:
 
 # ─── Data Split ───────────────────────────────────────────────────────────────
 data_split:
-  train_end:  16
-  val_start:  16
-  val_end:    32
+  train_end:  2374
+  val_start:  2374
+  val_end:    2671
+  test_end:   2968
 
 # ─── VAE ──────────────────────────────────────────────────────────────────────
 vae:
@@ -57,7 +58,7 @@ discriminator:
 
 # ─── Training ─────────────────────────────────────────────────────────────────
 training:
-  n_epochs:           10
+  n_epochs:           1000
   batch_size:         8
   val_interval:       5
   save_interval:      5
