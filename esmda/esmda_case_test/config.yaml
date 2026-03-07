@@ -1,0 +1,65 @@
+# ─── Paths ────────────────────────────────────────────────────────────────────
+paths:
+  run_path:         "/scratch/groups/lou/runs_esmda/"
+  single_run_path:  "/scratch/groups/lou/runs_true/"
+  diffuser_dir:     "../"
+  h5_file:          "/oak/stanford/groups/lou/gdifede/3d_datasets/geomodels_128_paper.h5"
+  true_model:       "./true.npy"
+
+# ─── Grid ─────────────────────────────────────────────────────────────────────
+grid:
+  Nx: 128
+  Ny: 128
+  Nz: 32
+  Nx_latent: 16
+  Ny_latent: 16
+  Nz_latent: 4
+
+# ─── Diffusion ────────────────────────────────────────────────────────────────
+diffusion:
+  n_steps:      20
+  scale_factor: 0.9 # must match with the VAE training output
+  beta_start:   0.0015
+  beta_end:     0.0195
+  schedule:     "scaled_linear_beta"
+
+# ─── Facies ───────────────────────────────────────────────────────────────────
+facies:
+  thresh1: 0.25 # to discretize facies
+  thresh2: 0.80
+  perm:  {0: 50.0,  1: 400.0,  2: 2000.0} # to assign fixed values to facies
+  poro:  {0: 0.05,  1: 0.15,   2: 0.20}
+
+# ─── Simulation ───────────────────────────────────────────────────────────────
+simulation:
+  N_prod:          6
+  N_inj:           3
+  Nt:              30
+  dt:              50
+  results_file:    "/RESULTS/test/result.RSM"
+  
+ # ─── Ensemble ─────────────────────────────────────────────────────────────────
+ensemble:
+  Na:           10    # must match with the length of alpha
+  nr:           200   # must match --array range in esmda_ensemble.slurm
+  batch_size:   20    # for the diffusion generation function to save memory
+
+# ─── ES-MDA ───────────────────────────────────────────────────────────────────
+esmda:
+  error_q: 0.02 # measurement error standard deviation
+  alpha:   [57.017, 35.0, 25.0, 20.0, 18.0, 15.0, 12.0, 8.0, 5.0, 3.0] # inflation coefficients used for ESMDA
+  times:   [50, 100, 150, 200, 250, 300, 350, 400, 450, 500] # time steps used for ESMDA
+
+
+
+# ─── Wells ────────────────────────────────────────────────────────────────────
+wells:
+  i1: [16,  16]
+  i2: [16,  64]
+  i3: [16, 112]
+  i4: [64,  16]
+  p1: [64,  64]
+  p2: [64, 112]
+  p3: [112,  16]
+  p4: [112,  64]
+  p5: [112, 112]
