@@ -36,6 +36,8 @@ To run a new case, duplicate the `case_test` template folder inside the main dir
 
 > *The true model can be any sample from the geomodel dataset. Examples used in the paper are available in the `data` folder.
 
+For VAE and U-net `.pkl`'s and `.pt`'s, modify the field `diffuser_dir` in `config.yaml` if they are not in the parent folder (e.g., in a case folder from training)
+
 ---
 
 ## Repository Structure
