@@ -21,19 +21,19 @@ To set up a new case:
 ```bash
    python train_vae.py
 ```
-   Checkpoints will be saved to `case_dir/trained_vae/`.
+   Checkpoints will be saved to `<<case_dir>>/trained_vae/`.
 
 4. Train the U-net (update `vae_epoch` in `config_unet.yaml` to select which VAE checkpoint to load; set to `""` for the final step):
 ```bash
    python train_unet.py
 ```
-   Checkpoints will be saved to `case_dir/trained_unet/`.
+   Checkpoints will be saved to `<<case_dir>>/trained_unet/`.
 
 5. Generate new samples (update `vae_epoch` and `unet_epoch` in `generate.py` to select checkpoints; set to `""` for the final step):
 ```bash
    python generate.py
 ```
-   Generated samples will be saved to `case_dir/generated_samples.npy`.
+   Generated samples will be saved to `<<case_dir>>/generated_samples.npy`.
 
 ## Configuration
 All training and generation parameters are managed through two YAML configuration files:
