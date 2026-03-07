@@ -33,15 +33,15 @@ wells:
 
 # ─── Data Split ───────────────────────────────────────────────────────────────
 data_split:
-  train_end:  8
-  val_start:  8
-  val_end:    16
-  test_end:   16
-
+  train_end:  2374
+  val_start:  2374
+  val_end:    2671
+  test_end:   2968
+  
 # ─── VAE Checkpoint ───────────────────────────────────────────────────────────
 vae:
-  epoch:     10
-  multi_gpu: true
+  epoch:     350
+  multi_gpu: false
 
 # ─── UNet ─────────────────────────────────────────────────────────────────────
 unet:
