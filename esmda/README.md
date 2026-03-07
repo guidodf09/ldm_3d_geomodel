@@ -136,6 +136,8 @@ Files written and updated throughout the workflow:
 | `csi_current_iter{i}.npy` | `esmda_iter.py` | Snapshot of flattened latents after iteration `i` |
 | `z_current_iter{i}.npy` | `esmda_iter.py` | Snapshot of latent vectors after iteration `i` |
 
+Only `current.npy, csi_current.npy` and and the `all_data_all_times*` files are necessary for ESMDA. To avoid saving intermediate steps, modify `generate_priors.py` and `esmda_iter.py`.
+
 ### `logs/`
 SLURM stdout/stderr logs for each job:
 
