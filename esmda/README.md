@@ -160,5 +160,5 @@ SLURM stdout/stderr logs for each job:
 - Python 3.9
 - PyTorch
 - MONAI Generative
-- tNavigator (loaded via HPC module system)
+- tNavigator (loaded via HPC module system and launched by the command in `esmda_ensemble.slurm`)
 - PyYAML
