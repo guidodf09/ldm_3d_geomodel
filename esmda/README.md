@@ -23,7 +23,7 @@ Jobs are submitted with dependency chaining so each stage automatically triggers
 ---
 
 ## Quick Start
-To run a new case, duplicate the `case_test` template folder inside the main directory, and modify `config.yaml` as needed. The ensemble size and parallel batch are especially important for cluster systems. The parent folder must contain the following files:
+To run a new case, duplicate the `esmda_case_test` template folder inside the main directory, and modify `config.yaml` as needed. The ensemble size and parallel batch are especially important for cluster systems. The parent folder must contain the following files:
 
 | File | Description |
 |---|---|
