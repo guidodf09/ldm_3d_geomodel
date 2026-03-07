@@ -41,7 +41,7 @@ data_split:
 # ─── VAE Checkpoint ───────────────────────────────────────────────────────────
 vae:
   epoch:     350
-  multi_gpu: false
+  multi_gpu: true
 
 # ─── UNet ─────────────────────────────────────────────────────────────────────
 unet:
@@ -55,10 +55,10 @@ unet:
 
 # ─── Training ─────────────────────────────────────────────────────────────────
 training:
-  n_epochs:      20
-  batch_size:    4
-  val_interval:  5
-  save_interval: 5
+  n_epochs:      1000
+  batch_size:    16
+  val_interval:  100
+  save_interval: 100
   seed:          0
   lr:            0.0001
 
