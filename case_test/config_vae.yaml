@@ -60,8 +60,8 @@ discriminator:
 training:
   n_epochs:           1000
   batch_size:         8 # reduce if memory does not allow (or use multiple gpus)
-  val_interval:       5
-  save_interval:      5
+  val_interval:       20
+  save_interval:      50
   warm_up_epochs:     5
   seed:               0
   lr:                 0.0001
