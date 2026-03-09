@@ -9,7 +9,7 @@ Our application involves large, conditional 3D three-facies (channel-levee-mud) 
 
 
 ## Contents
-- `scripts/` - Directory with `.py` scripts to preprocess the dataset, train the variational autoencoder (VAE) and U-net, and generate new realizations with 3D-LDM.
+- `scripts/` - Directory with `.py` scripts to preprocess the dataset, train the variational autoencoder (VAE) and U-net, and generate new realizations with 3D-LDM. It also contains the trained VAE and U-net.
 - `data/` - Directory to store training dataset used in this study `m_petrel.h5`  (3D, three-facies multiple scenario channelized geomodels). Additional files are the LDM-generated ensemble `m_gen_ldm.npy` used for static and flow statistics as well as for priors in history matching. Files are stored as `.h5` at the link provided. Synthetic "true" models used in history matching are saved as `m_true_1.npy`,  `m_true_2.npy` and `m_true_3.npy`. All are stored as `.npy` files.
 
 ## Quick Start
