@@ -3,7 +3,7 @@ paths:
   run_path:         "/scratch/groups/lou/runs_esmda/"
   single_run_path:  "/scratch/groups/lou/runs_true/"
   diffuser_dir:     "../"
-  h5_file:          "/oak/stanford/groups/lou/gdifede/3d_datasets/geomodels_128_paper.h5"
+  h5_file:          "../data/m_petrel.h5"
   true_model:       "./true.npy"
 
 # ─── Grid ─────────────────────────────────────────────────────────────────────
