@@ -9,52 +9,78 @@ Our application involves large, conditional 3D three-facies (channel-levee-mud) 
 
 
 ## Contents
-- `scripts/` - Directory with `.py` scripts to preprocess the dataset, train the variational autoencoder (VAE) and U-net, and generate new realizations with 3D-LDM. It also contains the trained VAE and U-net.
-- `data/` - Directory to store training dataset used in this study `m_petrel.h5`  (3D, three-facies multiple scenario channelized geomodels). Additional files are the LDM-generated ensemble `m_gen_ldm.npy` used for static and flow statistics as well as for priors in history matching. Files are stored as `.h5` at the link provided. Synthetic "true" models used in history matching are saved as `m_true_1.npy`,  `m_true_2.npy` and `m_true_3.npy`. All are stored as `.npy` files.
+- `scripts/` - Directory with `.py` scripts to train the VAE and U-net and generate new realizations with the 3D-LDM. Contains the following files:
+  - `train_vae.py` — trains the variational autoencoder
+  - `train_unet.py` — trains the U-net denoising model in latent space
+  - `generate.py` — generates new geomodel realizations using the trained LDM
+  - `utils.py` — shared utility functions for data processing, latent space operations, and diffusion generation
+
+- `case_test/` - Template case folder to be duplicated for new runs. Contains:
+  - `config_vae.yaml` — all parameters for VAE training
+  - `config_unet.yaml` — all parameters for U-net training and generation
+
+- `esmda/` - Directory with scripts for ensemble-based history matching (ES-MDA) using the trained LDM as a geological parameterization. Contains SLURM submission scripts and Python scripts for the ES-MDA workflow. See the dedicated `README.md for more details.
+
+- `data/` - Directory to store the training dataset (3D, three-facies multiple scenario channelized geomodels) and synthetic true models used in history matching (`true.npy`). Data files are available at the link provided.
+
 
 ## Quick Start
 To set up a new case:
 
-1. Duplicate the template folder and rename it for your case.
-2. Edit `config_vae.yaml` and `config_unet.yaml` — at minimum update `case_dir` and `h5_file` to point to your case directory and dataset.
-3. Train the VAE:
+1. Duplicate `case_test/` and rename it for your case.
+2. Edit `config_vae.yaml` and `config_unet.yaml` — at minimum update `h5_file` to point to your dataset. Set `case_dir: "./"` to write all outputs to the case folder.
+3. Train the VAE (run from inside the case folder):
 ```bash
-   python train_vae.py
+python ../scripts/train_vae.py
 ```
-   Checkpoints will be saved to `<<case_dir>>/trained_vae/`.
+Checkpoints will be saved to `trained_vae/`. The scale factor will be automatically computed and written to `config_unet.yaml`.
 
-4. Train the U-net (update `vae_epoch` in `config_unet.yaml` to select which VAE checkpoint to load; set to `""` for the final step):
+4. Train the U-net (update `vae.epoch` in `config_unet.yaml` to select which VAE checkpoint to load; leave empty for the final checkpoint):
 ```bash
-   python train_unet.py
+python ../scripts/train_unet.py
 ```
-   Checkpoints will be saved to `<<case_dir>>/trained_unet/`.
+Checkpoints will be saved to `trained_unet/`.
 
-5. Generate new samples (update `vae_epoch` and `unet_epoch` in `generate.py` to select checkpoints; set to `""` for the final step):
+5. Generate new samples (update `vae_epoch` and `unet_epoch` in `generate.py` to select checkpoints; leave empty for the final checkpoint):
 ```bash
-   python generate.py
+python ../scripts/generate.py
 ```
-   Generated samples will be saved to `<<case_dir>>/generated_samples.npy`.
+Generated samples will be saved to `generated_samples.npy`.
 
 ## Configuration
-All training and generation parameters are managed through two YAML configuration files:
-- `config_vae.yaml` - Paths, grid dimensions, facies thresholds, well locations, data split, VAE architecture, discriminator, training settings, loss weights, and diffusion scheduler parameters for VAE training.
-- `config_unet.yaml` - Paths, grid dimensions, facies thresholds, well locations, data split, VAE checkpoint, UNet architecture, training settings, and diffusion scheduler parameters for UNet training and generation.
+All training and generation parameters are managed through two YAML configuration files located in the case folder:
+- `config_vae.yaml` — paths, grid dimensions, facies thresholds, well locations, data split, VAE architecture, discriminator, training settings, and loss weights.
+- `config_unet.yaml` — paths, grid dimensions, facies thresholds, well locations, data split, VAE checkpoint, UNet architecture, training settings, diffusion scheduler parameters, and VAE scale factor (written automatically by `train_vae.py`).
 
-Trained model checkpoints are saved in subdirectories `trained_vae/` and `trained_unet/` within `case_dir`.
+Trained model checkpoints are saved in subdirectories `trained_vae/` and `trained_unet/` within the case folder.
+
+## Software Requirements
+A `requirements.txt` file is provided. The main dependencies are:
+```
+torch>=1.8
+monai-generative
+diffusers
+h5py
+numpy
+pandas
+pyyaml
+tqdm
+```
+
+Install with:
+```bash
+pip install -r requirements.txt
+```
+
+This workflow is tested with Python 3.9 and PyTorch 1.8 (CPU/GPU). GPU is strongly recommended for training.
 
 ## Code implementations are based on the following repositories:
 - [diffusers](https://github.com/huggingface/diffusers/)
 - [monai](https://github.com/Project-MONAI/tutorials/tree/main/generative) and [tutorial](https://github.com/Project-MONAI/GenerativeModels/blob/main/tutorials/generative/3d_ldm/3d_ldm_tutorial.ipynb)
 
-## Software requirements
-Running the scripts requires the libraries `datasets`, `diffusers`, `monai` or `monai-generative`, and `pyyaml`.
-\
-This workflow is tested with Python 3.9 and PyTorch 1.8 (CPU/GPU).
-
 ## Contact
 Guido Di Federico, Louis J. Durlofsky  
-Department of Energy Science & Engineering, Stanford University 
-\
+Department of Energy Science & Engineering, Stanford University  
 Contact: gdifede@stanford.edu
 
 ## Examples
