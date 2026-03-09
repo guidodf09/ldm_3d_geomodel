@@ -22,6 +22,8 @@ diffusion:
   beta_start:   0.0015
   beta_end:     0.0195
   schedule:     "scaled_linear_beta"
+  multi_gpu:    true  # must match VAE training setting in config_unet.yaml
+
 
 # ─── Facies ───────────────────────────────────────────────────────────────────
 facies:
