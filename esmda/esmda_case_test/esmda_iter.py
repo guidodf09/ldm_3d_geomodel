@@ -83,7 +83,7 @@ unet.to(device).eval()
 
 # ─── Scheduler & Inferer ──────────────────────────────────────────────────────
 scheduler = DDIMScheduler(
-    num_train_timesteps=1000,
+    num_train_timesteps=cfg['diffusion']['n_train_timesteps'],
     schedule=cfg['diffusion']['schedule'],
     beta_start=cfg['diffusion']['beta_start'],
     beta_end=cfg['diffusion']['beta_end'],
