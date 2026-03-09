@@ -18,6 +18,7 @@ grid:
 # ─── Diffusion ────────────────────────────────────────────────────────────────
 diffusion:
   n_steps:      20
+  n_train_timesteps: 1000 # must be the same used in the U-net training
   scale_factor: 0.9 # must match with the VAE training output
   beta_start:   0.0015
   beta_end:     0.0195
