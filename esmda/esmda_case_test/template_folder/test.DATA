@@ -1,0 +1,265 @@
+RUNSPEC   == memory dimensioning of the run =============================
+
+TITLE     -- title of the run
+MODEL a: 3D, CHANNELIZED, OIL-WATER SYSTEM
+
+DIMENS    -- dimensions of the model
+-- NX    NY   NZ
+   128    128    32 / --2D Model XY Section
+
+OIL       -- two phase black oil
+WATER     -- water is present, but no gas
+FIELD -- unit specification
+START     -- starting date for simulation run
+  1 'JAN' 2023 /
+
+EQLDIMS   -- equilibration table size
+    1  100   10    1   20 /
+TABDIMS   -- size of saturation and pvt tables
+    1    1   40   40 /
+WELLDIMS  -- max numb of WELLS/CONN per WELL/GROUPS/WELLperGROUP
+    2    20    1    2 /
+START     -- starting time for simulation run
+    1 'JAN' 2023  /
+NSTACK    -- usually 10
+    10 /
+
+GRID      == geometry of our model =====================================
+EQUALS    -- set top depth, block sizes and rock properties
+          -- valid for a given range of blocks: I1 I2   J1 J2   K1 K2
+      'DX'     10   /                        -- default box => all blocks
+      'DY'     10   /
+--      'PORO'   0.3 /
+      'DZ'     5  / -- thickness of the layers
+--      'PERMX'  500   /
+--      'PERMY'  300   /
+--      'PERMZ'  45   /
+--      'TOPS'   676.8 /
+
+/
+
+INCLUDE
+PERMX.INC /
+
+INCLUDE 
+PORO.INC
+/
+
+COPY
+PERMX PERMY /
+PERMX PERMZ /
+/
+
+MULTIPLY
+PERMZ 0.1 /
+PERMX 0.5 /
+PERMY 0.5 /
+/
+
+
+
+-- BOX
+-- 1 30 1 1 1 1/
+
+-- TOPS
+-- 30*6000/
+
+-- ENDBOX
+
+TOPS
+
+16384*4000  
+16384*4005  
+16384*4010  
+16384*4015  
+16384*4020  
+16384*4025  
+16384*4030  
+16384*4035  
+16384*4040  
+16384*4045  
+16384*4050  
+16384*4055  
+16384*4060  
+16384*4065  
+16384*4070  
+16384*4075  
+16384*4080  
+16384*4085  
+16384*4090  
+16384*4095  
+16384*4100  
+16384*4105  
+16384*4110  
+16384*4115  
+16384*4120  
+16384*4125  
+16384*4130  
+16384*4135  
+16384*4140  
+16384*4145  
+16384*4150  
+16384*4155  
+
+
+
+-- request init and grid file, necessary for post processing of the simulation with floviz
+INIT
+GRIDFILE
+ 2 /
+
+PROPS     == pvt and relperm tables =============================
+
+PVTW
+-- Pref | wat FVF @Pref | wat compres | visco@Pref | viscosibility @Pref
+   14.7       1.0          5.0E-7           1.0            0.0 /
+
+PVCDO      -- pvt for dead oil with constant compressibility
+-- Pref | oil FVF @Pref | oil compres | visco@Pref | viscosibility @Pref
+   14.7       1            1.7e-5         5             2e-6 /
+
+INCLUDE
+'.\KR.INC'
+/
+
+ROCK       -- reference Pressure and rock compressibility
+        14.7    0E-6
+/
+ 
+DENSITY   -- oil wat gas @surface(lbm/scf)
+        40.0  62.238  0.0647
+/
+
+SOLUTION   == initial state of solution variables =====================
+--EQUIL      -- DATA FOR INITIALISING FLUIDS TO POTENTIAL EQUILIBRIUM
+--    DATUM  DATUM   OWC    OWC    GOC    GOC    RSVD   RVVD   SOLN
+--    DEPTH  PRESS  DEPTH   PCOW  DEPTH   PCOG  TABLE  TABLE   METH
+--       6000  4200   20000    0    2000    0      1      0       0
+--/
+
+
+EQUALS
+SWAT 0.15/
+PRESSURE 4500 /
+/
+
+
+RPTSOL
+'RESTART=2' /
+
+SUMMARY    == output written to summary *.RSM file ====================
+RUNSUM     -- additional table in *.PRT file
+SEPARATE   -- write a seperate *.RSM file
+
+--FOPR
+--FWPR
+--FWIR
+WOPR
+'PROD1'
+'PROD2'
+'PROD3'
+'PROD4'
+'PROD5'
+'PROD6'
+/
+WWPR
+'PROD1'
+'PROD2'
+'PROD3'
+'PROD4'
+'PROD5'
+'PROD6'
+/
+WWIR
+'INJ1' 
+'INJ2'
+'INJ3' 
+/   
+--FOPT
+--FWPT
+--FWIT
+
+
+--BRPV 
+--1 1 1 /
+EXCEL
+
+--BPR        -- request pressure output for specified blocks for each time step
+-- 32  32 1 / --              Injector, one perforation
+-- 32 10 1 / --              Producer, one perforation
+--/
+
+SCHEDULE   == operations to be simulated ==============================
+RPTSCHED   -- CONTROLS ON OUTPUT AT EACH REPORT TIME
+  'WELLS=2' 'WELSPECS'
+/
+
+DRSDT     -- Free gas is not allowed to re-dissolve within oil
+  0 /
+
+RPTRST    -- request restart file
+'BASIC=2'
+/
+
+TUNING  -- min/max timestep (3 sections)
+0.1 50  /
+5*  0.1 /
+2* 100 /
+
+
+WELSPECS   == WELL SPECIFICATION DATA ================================
+--   WELL   GROUP LOCATION  BHP   PI
+--   NAME   NAME    I   J    DEPTH DEFN
+    'PROD1' 'W1'    16   112   -1 'OIL'   2* 'STOP' /
+    'PROD2' 'W1'    64   112   -1 'OIL'   2* 'STOP' /
+    'PROD3' 'W1'    112   112   -1 'OIL'   2* 'STOP' /
+    'PROD4' 'W1'    16   16   -1 'OIL'   2* 'STOP' /
+    'PROD5' 'W1'   64  16  -1 'OIL'   2* 'STOP' /
+    'PROD6' 'W1'   112  16   -1 'OIL'   2* 'STOP' /
+
+    'INJ1'  'W1'    16  64   -1 'WATER' 2* 'STOP' /
+    'INJ2'  'W1'    64   64   -1 'WATER' 2* 'STOP' /
+    'INJ3'  'W1'   112   64   -1 'WATER' 2* 'STOP' /
+/
+
+COMPDAT    -- COMPLETION SPECIFICATION DATA
+--   WELL    I   J   K1  K2   SHUT  TAB FACT  DIAM
+    'PROD1'  16  112   16   32  'OPEN' 0   -1   0.5 /
+    'PROD2'  64  112   1  16  'OPEN' 0   -1   0.5 /
+    'PROD3'  112  112   16   32  'OPEN' 0   -1   0.5 /
+    'PROD4'  16  16  1  16  'OPEN' 0   -1   0.5 /
+    'PROD5' 64 16   16   32  'OPEN' 0   -1   0.5 /
+    'PROD6' 112 16   1   16  'OPEN' 0   -1   0.5 /
+
+    'INJ1'   16 64   1   16  'OPEN' 0   -1   0.5 /
+    'INJ2'   64  64   16   32  'OPEN' 0   -1   0.5 /
+    'INJ3'  112 64   1   16  'OPEN' 0   -1   0.5 /
+/
+
+WCONPROD   -- PRODUCTION WELL CONTROLS
+--   WELL    SHUT   CTRL    OIL  WATER  GAS   LIQ    RES   BHP
+    'PROD1'  'OPEN' 'BHP'  5* 4300 /
+    'PROD2'  'OPEN' 'BHP'  5* 4300 /
+    'PROD3'  'OPEN' 'BHP'  5* 4300 /
+    'PROD4'  'OPEN' 'BHP'  5* 4300 /
+    'PROD5'  'OPEN' 'BHP'  5* 4300 /
+    'PROD6'  'OPEN' 'BHP'  5* 4300 /
+/
+
+
+
+WCONINJE   -- INJECTION WELL CONTROLS
+--   WELL    TYPE    STATUS  MODE   RATE   BHPLIM
+    'INJ1'  'WATER'  'OPEN' 'BHP'   2*    4700 /
+    'INJ2'  'WATER'  'OPEN' 'BHP'   2*    4700 /
+    'INJ3'  'WATER'  'OPEN' 'BHP'   2*    4700 /
+/
+
+
+-- timesteps can be refined by entering multiple TSTEP keywords
+TSTEP      -- and run it for 5 yrs
+   30*50
+/
+
+
+END     ================================================================ 
