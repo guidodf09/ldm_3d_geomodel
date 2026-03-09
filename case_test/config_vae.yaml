@@ -1,7 +1,7 @@
 # ─── Paths ────────────────────────────────────────────────────────────────────
 paths:
   case_dir: "./"
-  h5_file:  "/oak/stanford/groups/lou/gdifede/3d_datasets/geomodels_128_paper.h5"
+  h5_file:  "../data/m_petrel.h5"
   vae_dir: "trained_vae"
 
 # ─── Grid ─────────────────────────────────────────────────────────────────────
