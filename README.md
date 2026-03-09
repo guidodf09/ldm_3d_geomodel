@@ -55,23 +55,8 @@ All training and generation parameters are managed through two YAML configuratio
 Trained model checkpoints are saved in subdirectories `trained_vae/` and `trained_unet/` within the case folder.
 
 ## Software Requirements
-A `requirements.txt` file is provided. The main dependencies are:
-```
-torch>=1.8
-monai-generative
-diffusers
-h5py
-numpy
-pandas
-pyyaml
-tqdm
-```
-
-Install with:
-```bash
-pip install -r requirements.txt
-```
-
+Running the scripts requires the following Python libraries: `torch`, `monai-generative`, `h5py`, `numpy`, `pandas`, `pyyaml`, and `tqdm`.
+\
 This workflow is tested with Python 3.9 and PyTorch 1.8 (CPU/GPU). GPU is strongly recommended for training.
 
 ## Code implementations are based on the following repositories:
