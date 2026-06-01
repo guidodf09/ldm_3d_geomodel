@@ -119,7 +119,7 @@ discriminator = PatchDiscriminator(
 
 # ─── Optimizers & Losses ──────────────────────────────────────────────────────
 optimizer_g = torch.optim.Adam(autoencoder.parameters(),   lr=cfg['training']['lr'])
-optimizer_d = torch.optim.Adam(discriminator.parameters(), lr=cfg['training']['lr'])
+optimizer_d = torch.optim.Adam(discriminator.parameters(), lr=cfg['training']['lr_disc'])
 
 l1_loss        = L1Loss()
 percep_loss_fn = PerceptualLoss(
