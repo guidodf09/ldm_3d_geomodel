@@ -65,6 +65,7 @@ training:
   warm_up_epochs:     5
   seed:               0
   lr:                 0.0001
+  lr_disc:                 0.0005
   perceptual_network: "squeeze" # or resnet50
   multi_gpu:        true # false for single gpu
 
