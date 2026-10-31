@@ -1,3 +1,8 @@
+<p align="center">
+  <img src="./pics/ddim_50steps_seed0.gif" 
+       alt="3D DDIM denoising generation with 50 steps" 
+       width="700"/>
+</p>
 # Multiscenario 3D Latent Diffusion for Geomodel Parameterization
 
 Code example for "3D latent diffusion models for parameterizing and history matching multiscenario facies systems" [https://link.springer.com/article/10.1007/s11004-025-10245-x]
