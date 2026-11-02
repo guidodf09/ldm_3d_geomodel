@@ -1,7 +1,7 @@
 
 # Multiscenario 3D Latent Diffusion for Geomodel Parameterization
 <p align="center">
-  <img src="./pics/ddim_50steps_seed0.gif" 
+  <img src="./pics/ddim_50steps_seed0_titled.gif" 
        alt="3D DDIM denoising generation with 50 steps" 
        width="400"/>
 </p>
